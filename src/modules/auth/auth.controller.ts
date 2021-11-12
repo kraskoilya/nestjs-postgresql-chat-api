@@ -1,0 +1,30 @@
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Post,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { CreateUserDto } from './dto/createUser.dto';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private authService: AuthService) {}
+
+  @UsePipes(new ValidationPipe())
+  @Post('login')
+  @HttpCode(200)
+  async login(@Body() { login, password }: any) {
+    const user = await this.authService.validateUser(login, password);
+    return this.authService.login(user.email);
+  }
+
+  @UsePipes(new ValidationPipe())
+  @Post('registration')
+  @HttpCode(201)
+  async registration(@Body() user: CreateUserDto) {
+    return this.authService.register(user);
+  }
+}
