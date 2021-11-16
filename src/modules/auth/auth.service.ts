@@ -1,9 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { compare, genSalt, hashAsync } from 'bcryptjs';
+import { compare, genSalt, hash } from 'bcryptjs';
 import { classToPlain, plainToClass } from 'class-transformer';
 import {
+  ALREADY_REGISTER_USER,
   USER_NOT_FOUND,
   USER_WRONG_CREDENTIALS,
 } from 'src/shared/constants/users.constants';
@@ -19,22 +24,30 @@ export class AuthService {
   ) {}
 
   async register(user: CreateUserDto) {
+    const hasUser = await this.userRepo.findOne({
+      email: user.email,
+    });
+
+    if (hasUser) {
+      throw new BadRequestException(ALREADY_REGISTER_USER);
+    }
+
     const salt = await genSalt(10);
     const newUSer = {
       ...user,
       email: user.email,
-      passwordHash: await hashAsync(user.password, salt),
+      passwordHash: await hash(user.password, salt),
     };
     const data = classToPlain(newUSer);
 
-    const createdUser = await this.userRepo.create(plainToClass(User, data));
+    const createdUser = this.userRepo.create(plainToClass(User, data));
     await this.userRepo.save(createdUser);
 
     return createdUser;
   }
 
-  async login(email: string) {
-    const payload = email;
+  async login(user: User) {
+    const payload = { email: user.email, sub: user.id };
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
