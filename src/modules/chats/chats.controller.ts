@@ -13,6 +13,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { MessageDto } from '../messages/dto/message.dto';
+import { Message } from '../messages/message.entety';
 import { Chat } from './chat.entity';
 import { ChatsService } from './chats.service';
 import { ChatDto } from './dto/chat.dto';
@@ -55,5 +57,17 @@ export class ChatsController {
   @HttpCode(200)
   getItems(): Promise<Chat[]> {
     return this.chatsService.getItems();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe())
+  @Post(':id/message')
+  @HttpCode(201)
+  sendMessage(
+    @Req() req: any,
+    @Param('id') id: number,
+    @Body() messageDto: MessageDto,
+  ): Promise<Message> {
+    return this.chatsService.createMessage(id, messageDto, req.user);
   }
 }

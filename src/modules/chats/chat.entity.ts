@@ -8,9 +8,11 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Message } from '../messages/message.entety';
 
 @Entity({ name: 'chats' })
 export class Chat extends BaseEntity {
@@ -36,6 +38,9 @@ export class Chat extends BaseEntity {
   })
   @JoinTable()
   users: User[];
+
+  @OneToMany(() => Message, (message: Message) => message.chat)
+  public messages: Message[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

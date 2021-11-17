@@ -1,10 +1,12 @@
 import { Chat } from 'src/modules/chats/chat.entity';
+import { Message } from 'src/modules/messages/message.entety';
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
   ManyToMany,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -26,6 +28,9 @@ export class User extends BaseEntity {
 
   @Column('text', { select: false })
   passwordHash: string;
+
+  @OneToMany(() => Message, (message: Message) => message.user)
+  public message: Message;
 
   @OneToOne(() => Chat, (chat: Chat) => chat.created_by)
   public createdChat: Chat;

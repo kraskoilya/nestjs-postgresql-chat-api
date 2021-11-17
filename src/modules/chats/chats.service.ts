@@ -4,7 +4,9 @@ import { classToPlain, plainToClass } from 'class-transformer';
 import { USER_NOT_FOUND } from 'src/shared/constants/users.constants';
 import { User } from 'src/shared/models/user.entity';
 import { Repository } from 'typeorm';
-import { UsersService } from '../users/users.service';
+import { MessageDto } from '../messages/dto/message.dto';
+import { Message } from '../messages/message.entety';
+import { MessagesService } from '../messages/messages.service';
 import { Chat } from './chat.entity';
 import { ChatDto } from './dto/chat.dto';
 
@@ -12,7 +14,7 @@ import { ChatDto } from './dto/chat.dto';
 export class ChatsService {
   constructor(
     @InjectRepository(Chat) private charRepo: Repository<Chat>,
-    private readonly userRepo: UsersService,
+    private readonly messagesService: MessagesService,
   ) {}
 
   async create(chatDto: ChatDto, user: User): Promise<Chat> {
@@ -68,5 +70,25 @@ export class ChatsService {
     return chat;
   }
 
-  // async addUserToChat
+  async createMessage(
+    id: number,
+    messageDto: MessageDto,
+    user: User,
+  ): Promise<Message> {
+    const chat = await this.charRepo.findOne(id);
+
+    if (!chat) {
+      if (!chat) {
+        throw new BadRequestException(USER_NOT_FOUND);
+      }
+    } else {
+      const createdMessage = {
+        ...messageDto,
+        chat,
+        user,
+      };
+
+      return await this.messagesService.saveMessage(createdMessage);
+    }
+  }
 }
