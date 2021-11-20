@@ -11,6 +11,7 @@ export class MessagesService {
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
   ) {}
+
   async saveMessage(messageDto: MessageDto): Promise<Message> {
     const data = classToPlain(messageDto);
     const createdMessage = this.messageRepo.create({
@@ -20,5 +21,21 @@ export class MessagesService {
     await this.messageRepo.save(createdMessage);
     delete createdMessage.chat;
     return createdMessage;
+  }
+
+  async getMessages(id: number, offset?: number, limit?: number): Promise<any> {
+    const [items, count] = await this.messageRepo.findAndCount({
+      where: { chat: { id } },
+      order: {
+        id: 'ASC',
+      },
+      skip: offset,
+      take: limit,
+    });
+
+    return {
+      items,
+      count,
+    };
   }
 }

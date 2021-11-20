@@ -78,9 +78,7 @@ export class ChatsService {
     const chat = await this.charRepo.findOne(id);
 
     if (!chat) {
-      if (!chat) {
-        throw new BadRequestException(USER_NOT_FOUND);
-      }
+      throw new BadRequestException(USER_NOT_FOUND);
     } else {
       const createdMessage = {
         ...messageDto,
@@ -90,5 +88,19 @@ export class ChatsService {
 
       return await this.messagesService.saveMessage(createdMessage);
     }
+  }
+
+  async getMessages(
+    id: number,
+    offset: number,
+    limit: number,
+  ): Promise<Message[]> {
+    const chat = await this.charRepo.findOne(id);
+
+    if (!chat) {
+      throw new BadRequestException(USER_NOT_FOUND);
+    }
+
+    return await this.messagesService.getMessages(id, offset, limit);
   }
 }

@@ -7,11 +7,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { PaginationParams } from 'src/shared/models/pagination';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { MessageDto } from '../messages/dto/message.dto';
 import { Message } from '../messages/message.entety';
@@ -69,5 +71,16 @@ export class ChatsController {
     @Body() messageDto: MessageDto,
   ): Promise<Message> {
     return this.chatsService.createMessage(id, messageDto, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe())
+  @Get(':id/messages')
+  @HttpCode(200)
+  getMessages(
+    @Query() { offset, limit }: PaginationParams,
+    @Param('id') id: number,
+  ): Promise<Message[]> {
+    return this.chatsService.getMessages(id, offset, limit);
   }
 }
