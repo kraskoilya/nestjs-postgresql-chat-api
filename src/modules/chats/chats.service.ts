@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { classToPlain, plainToClass } from 'class-transformer';
-import { USER_NOT_FOUND } from 'src/shared/constants/users.constants';
+import { CHAT_NOT_FOUND } from 'src/shared/constants/char.constatnt';
 import { User } from 'src/shared/models/user.entity';
 import { Repository } from 'typeorm';
 import { MessageDto } from '../messages/dto/message.dto';
@@ -33,7 +33,7 @@ export class ChatsService {
     });
 
     if (!findedChat) {
-      throw new BadRequestException(USER_NOT_FOUND);
+      throw new BadRequestException(CHAT_NOT_FOUND);
     }
 
     const data = classToPlain(chatDto);
@@ -51,7 +51,7 @@ export class ChatsService {
     const findedChat = await this.charRepo.findOne({ id });
 
     if (!findedChat) {
-      throw new BadRequestException(USER_NOT_FOUND);
+      throw new BadRequestException(CHAT_NOT_FOUND);
     }
 
     return await this.charRepo.delete(id);
@@ -65,7 +65,7 @@ export class ChatsService {
     const chat = await this.charRepo.findOne(id, { relations: ['users'] });
 
     if (!chat) {
-      throw new BadRequestException(USER_NOT_FOUND);
+      throw new BadRequestException(CHAT_NOT_FOUND);
     }
     return chat;
   }
@@ -78,7 +78,7 @@ export class ChatsService {
     const chat = await this.charRepo.findOne(id);
 
     if (!chat) {
-      throw new BadRequestException(USER_NOT_FOUND);
+      throw new BadRequestException(CHAT_NOT_FOUND);
     } else {
       const createdMessage = {
         ...messageDto,
@@ -98,7 +98,7 @@ export class ChatsService {
     const chat = await this.charRepo.findOne(id);
 
     if (!chat) {
-      throw new BadRequestException(USER_NOT_FOUND);
+      throw new BadRequestException(CHAT_NOT_FOUND);
     }
 
     return await this.messagesService.getMessages(id, offset, limit);
