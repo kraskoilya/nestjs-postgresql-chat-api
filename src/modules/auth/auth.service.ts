@@ -24,9 +24,12 @@ export class AuthService {
   ) {}
 
   async register(user: CreateUserDto) {
+    console.log(user);
+
     const hasUser = await this.userRepo.findOne({
       email: user.email,
     });
+    console.log(hasUser);
 
     if (hasUser) {
       throw new BadRequestException(ALREADY_REGISTER_USER);
@@ -48,8 +51,11 @@ export class AuthService {
 
   async login(user: User) {
     const payload = { email: user.email, sub: user.id };
+
+    delete user.passwordHash;
     return {
       access_token: await this.jwtService.signAsync(payload),
+      user,
     };
   }
 

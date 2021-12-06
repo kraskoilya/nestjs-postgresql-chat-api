@@ -26,7 +26,7 @@ export class User extends BaseEntity {
   @Column('text', { unique: true })
   email: string;
 
-  @Column('text', { select: false })
+  @Column('text')
   passwordHash: string;
 
   @OneToMany(() => Message, (message: Message) => message.user)
