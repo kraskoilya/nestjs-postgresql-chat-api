@@ -1,13 +1,3 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { createParamDecorator } from '@nestjs/common';
 
-export const CurrentUser = createParamDecorator(
-  (data: string, ctx: ExecutionContext) => {
-    const user = ctx.switchToHttp().getRequest().user;
-
-    if (!user) {
-      return null;
-    }
-
-    return data ? user[data] : user; // extract a specific property only if specified or get a user object
-  },
-);
+export const CurrentUser = createParamDecorator((data, req) => req.user);

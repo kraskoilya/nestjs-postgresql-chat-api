@@ -24,12 +24,9 @@ export class AuthService {
   ) {}
 
   async register(user: CreateUserDto) {
-    console.log(user);
-
     const hasUser = await this.userRepo.findOne({
       email: user.email,
     });
-    console.log(hasUser);
 
     if (hasUser) {
       throw new BadRequestException(ALREADY_REGISTER_USER);
