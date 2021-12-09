@@ -9,6 +9,7 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -41,6 +42,9 @@ export class Chat extends BaseEntity {
 
   @OneToMany(() => Message, (message: Message) => message.chat)
   public messages: Message[];
+
+  @OneToOne(() => Message, (message: Message) => message.chat)
+  public last_message: Message;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

@@ -63,7 +63,7 @@ export class ChatsController {
 
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
-  @Post(':id/message')
+  @Post(':id/messages')
   @HttpCode(201)
   sendMessage(
     @Req() req: any,

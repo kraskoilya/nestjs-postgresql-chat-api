@@ -58,7 +58,7 @@ export class ChatsService {
   }
 
   async getItems(): Promise<Chat[]> {
-    return await this.charRepo.find({ relations: ['users'] });
+    return await this.charRepo.find({ relations: ['users', 'last_message'] });
   }
 
   async get(id: number): Promise<Chat> {

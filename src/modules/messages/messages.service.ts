@@ -34,7 +34,7 @@ export class MessagesService {
     });
 
     return {
-      items,
+      data: items,
       count,
     };
   }
