@@ -56,6 +56,11 @@ export class AuthService {
     };
   }
 
+  async logout(auth: string) {
+    const jwt = auth.replace('Bearer ', '');
+    return this.jwtService.decode(jwt);
+  }
+
   async validateUser(email: string, pass: string): Promise<User> {
     const user = await this.userRepo.findOne({
       email,

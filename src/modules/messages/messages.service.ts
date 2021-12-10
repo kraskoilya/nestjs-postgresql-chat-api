@@ -27,7 +27,7 @@ export class MessagesService {
     const [items, count] = await this.messageRepo.findAndCount({
       where: { chat: { id } },
       order: {
-        id: 'ASC',
+        createdAt: 'DESC',
       },
       skip: offset,
       take: limit,
