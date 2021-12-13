@@ -1,21 +1,36 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { WsException } from '@nestjs/websockets';
 import { classToPlain, plainToClass } from 'class-transformer';
+import { Socket } from 'socket.io';
 import { CHAT_NOT_FOUND } from 'src/shared/constants/char.constatnt';
 import { User } from 'src/shared/models/user.entity';
 import { Repository } from 'typeorm';
+import { AuthService } from '../auth/auth.service';
 import { MessageDto } from '../messages/dto/message.dto';
 import { Message } from '../messages/message.entety';
 import { MessagesService } from '../messages/messages.service';
+import { UsersService } from '../users/users.service';
 import { Chat } from './chat.entity';
 import { ChatDto } from './dto/chat.dto';
-
 @Injectable()
 export class ChatsService {
   constructor(
     @InjectRepository(Chat) private charRepo: Repository<Chat>,
     private readonly messagesService: MessagesService,
+    private readonly authService: AuthService,
+    private readonly userService: UsersService,
   ) {}
+
+  async getUserFromSocket(socket: Socket) {
+    const user = await this.authService.getUserFromAuthenticationToken(
+      socket.handshake.headers.authorization.replace('Bearer ', ''),
+    );
+    if (!user) {
+      throw new WsException('Invalid credentials.');
+    }
+    return user;
+  }
 
   async create(chatDto: ChatDto, user: User): Promise<Chat> {
     const data = classToPlain(chatDto);
@@ -80,10 +95,11 @@ export class ChatsService {
     if (!chat) {
       throw new BadRequestException(CHAT_NOT_FOUND);
     } else {
+      const userRepo = await this.userService.get(user.id);
       const createdMessage = {
         ...messageDto,
         chat,
-        user,
+        user: userRepo,
       };
 
       return await this.messagesService.saveMessage(createdMessage);
@@ -102,5 +118,9 @@ export class ChatsService {
     }
 
     return await this.messagesService.getMessages(id, offset, limit);
+  }
+
+  async savedMessage(message: string, user: User) {
+    return await this.messagesService.setMessage(message, user);
   }
 }

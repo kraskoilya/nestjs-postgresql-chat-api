@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { classToPlain, plainToClass } from 'class-transformer';
+import { User } from 'src/shared/models/user.entity';
 import { Repository } from 'typeorm';
 import { MessageDto } from './dto/message.dto';
 import { Message } from './message.entety';
@@ -11,6 +12,16 @@ export class MessagesService {
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
   ) {}
+
+  async setMessage(message: string, user: User) {
+    const newMessage = await this.messageRepo.create({
+      message,
+      user,
+    });
+    await this.messageRepo.save(newMessage);
+    delete newMessage.user;
+    return newMessage;
+  }
 
   async saveMessage(messageDto: MessageDto): Promise<Message> {
     const data = classToPlain(messageDto);

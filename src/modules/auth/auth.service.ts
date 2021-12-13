@@ -3,6 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compare, genSalt, hash } from 'bcryptjs';
@@ -21,6 +22,7 @@ export class AuthService {
   constructor(
     @InjectRepository(User) private userRepo: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async register(user: CreateUserDto) {
@@ -77,5 +79,15 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  public async getUserFromAuthenticationToken(token: string) {
+    const payload = this.jwtService.verify(token, {
+      secret: this.configService.get('JWT_SECRET_KEY'),
+    });
+
+    if (payload.sub) {
+      return this.userRepo.findOne({ id: payload.sub });
+    }
   }
 }

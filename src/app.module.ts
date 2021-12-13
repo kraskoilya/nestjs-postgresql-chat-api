@@ -7,12 +7,14 @@ import { getPostgreConfig } from './configs/postgre.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { ChatsModule } from './modules/chats/chats.module';
 import { MessagesModule } from './modules/messages/messages.module';
+import { SocketModule } from './shared/socket/socket.module';
 
 @Module({
   imports: [
     AuthModule,
     ChatsModule,
     MessagesModule,
+    SocketModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
