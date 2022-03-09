@@ -5,6 +5,7 @@ import { classToPlain, plainToClass } from 'class-transformer';
 import { Socket } from 'socket.io';
 import { CHAT_NOT_FOUND } from 'src/shared/constants/char.constatnt';
 import { User } from 'src/shared/models/user.entity';
+import { SocketService } from 'src/shared/modules/external/services/socket.service';
 import { getConnection, Repository } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { MessageDto } from '../messages/dto/message.dto';
@@ -20,6 +21,7 @@ export class ChatsService {
     private readonly messagesService: MessagesService,
     private readonly authService: AuthService,
     private readonly userService: UsersService,
+    private readonly socketService: SocketService,
   ) {}
 
   async getUserFromSocket(socket: Socket) {
@@ -34,11 +36,32 @@ export class ChatsService {
 
   async create(chatDto: ChatDto, user: User): Promise<Chat> {
     const data = classToPlain(chatDto);
+    const users = [];
+
+    if (data?.users?.length) {
+      for (const { id } of data?.users) {
+        const user = await this.userService.get(id);
+        users.push(user);
+      }
+    }
+
     const createdChat = this.charRepo.create({
       ...plainToClass(Chat, data),
+      users,
       created_by: user,
     });
     await this.charRepo.save(createdChat);
+
+    if (createdChat) {
+      this.socketService.socket.sockets.emit('chat_created', {
+        event: 'chat_created',
+        data: {
+          user,
+          newChat: createdChat,
+        },
+      });
+    }
+
     return createdChat;
   }
 
@@ -75,13 +98,11 @@ export class ChatsService {
   async getItems(user: User): Promise<Chat[]> {
     const chats = await getConnection()
       .createQueryBuilder(Chat, 'chat')
-      .innerJoin(
-        'chats_users_users',
-        'cu',
-        'chat.id = cu."chatsId" OR chat."createdById" = ' + user.id,
-      )
+      .innerJoin('chats_users_users', 'cu', 'chat.id = cu."chatsId"')
       .leftJoinAndSelect('chat.users', 'users')
       .leftJoinAndSelect('chat.last_message', 'last_message')
+      .leftJoinAndSelect('chat.created_by', 'created_by')
+      .where(`chat."createdById" = ${user.id} OR cu."usersId" = ${user.id}`)
       .getMany();
 
     return chats;

@@ -25,10 +25,10 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('list')
+  @Get('')
   @HttpCode(200)
-  getItems(): Promise<User[]> {
-    return this.usersService.getItems();
+  getItems(@Req() req: any): Promise<User[]> {
+    return this.usersService.getItems(req.user);
   }
 
   @UseGuards(JwtAuthGuard)

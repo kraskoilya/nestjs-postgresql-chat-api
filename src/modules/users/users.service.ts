@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { USER_NOT_FOUND } from 'src/shared/constants/users.constants';
 import { User } from 'src/shared/models/user.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
@@ -27,8 +27,10 @@ export class UsersService {
     return findedUser;
   }
 
-  async getItems(): Promise<User[]> {
-    return await this.userRepo.find();
+  async getItems(myseft: User): Promise<User[]> {
+    return await this.userRepo.find({
+      where: { id: Not(myseft.id) },
+    });
   }
 
   async get(id: number): Promise<User> {

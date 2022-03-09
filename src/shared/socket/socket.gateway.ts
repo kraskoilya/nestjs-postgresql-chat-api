@@ -10,6 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatsService } from 'src/modules/chats/chats.service';
+import { SocketService } from '../modules/external/services/socket.service';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
@@ -18,9 +19,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection {
 
   private logger: Logger = new Logger('SsgGateway');
 
-  constructor(private readonly chatService: ChatsService) {}
+  constructor(
+    private readonly chatService: ChatsService,
+    private socketService: SocketService,
+  ) {}
 
   afterInit(server: any) {
+    this.socketService.socket = server;
     this.logger.log('Websocket gateway initialized');
   }
 
