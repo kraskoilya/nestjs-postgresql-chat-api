@@ -4,7 +4,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -30,7 +29,7 @@ export class Chat extends BaseEntity {
     eager: true,
     cascade: true,
   })
-  @JoinColumn()
+  @JoinTable()
   public created_by: User;
 
   @ManyToMany((type) => User, (user: User) => user.chats, {

@@ -27,7 +27,7 @@ export class ChatsController {
 
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
-  @Post('create')
+  @Post('')
   @HttpCode(201)
   create(@Req() req: any, @Body() chatDto: ChatDto): Promise<Chat> {
     return this.chatsService.create(chatDto, req.user);
@@ -57,8 +57,8 @@ export class ChatsController {
   @UseGuards(JwtAuthGuard)
   @Get('')
   @HttpCode(200)
-  getItems(): Promise<Chat[]> {
-    return this.chatsService.getItems();
+  getItems(@Req() req: any): Promise<Chat[]> {
+    return this.chatsService.getItems(req.user);
   }
 
   @UseGuards(JwtAuthGuard)

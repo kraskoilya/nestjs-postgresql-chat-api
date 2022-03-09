@@ -5,7 +5,7 @@ import { classToPlain, plainToClass } from 'class-transformer';
 import { Socket } from 'socket.io';
 import { CHAT_NOT_FOUND } from 'src/shared/constants/char.constatnt';
 import { User } from 'src/shared/models/user.entity';
-import { Repository } from 'typeorm';
+import { getConnection, Repository } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { MessageDto } from '../messages/dto/message.dto';
 import { Message } from '../messages/message.entety';
@@ -72,8 +72,19 @@ export class ChatsService {
     return await this.charRepo.delete(id);
   }
 
-  async getItems(): Promise<Chat[]> {
-    return await this.charRepo.find({ relations: ['users', 'last_message'] });
+  async getItems(user: User): Promise<Chat[]> {
+    const chats = await getConnection()
+      .createQueryBuilder(Chat, 'chat')
+      .innerJoin(
+        'chats_users_users',
+        'cu',
+        'chat.id = cu."chatsId" OR chat."createdById" = ' + user.id,
+      )
+      .leftJoinAndSelect('chat.users', 'users')
+      .leftJoinAndSelect('chat.last_message', 'last_message')
+      .getMany();
+
+    return chats;
   }
 
   async get(id: number): Promise<Chat> {
