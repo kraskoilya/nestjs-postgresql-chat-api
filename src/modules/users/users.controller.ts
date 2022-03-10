@@ -1,8 +1,10 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
   Param,
+  Patch,
   Req,
   UseGuards,
   UsePipes,
@@ -36,5 +38,12 @@ export class UsersController {
   @HttpCode(200)
   get(@Param('id') id: number): Promise<User> {
     return this.usersService.get(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe())
+  @Patch(':id')
+  update(@Param('id') id: number, @Body() user: User) {
+    return this.usersService.update(id, user);
   }
 }

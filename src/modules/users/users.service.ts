@@ -41,4 +41,14 @@ export class UsersService {
     }
     return user;
   }
+
+  async update(id: number, userData: User): Promise<User> {
+    const user = await this.userRepo.findOne(id);
+
+    if (!user) {
+      throw new BadRequestException(USER_NOT_FOUND);
+    }
+
+    return await this.userRepo.save({ ...user, ...userData });
+  }
 }
